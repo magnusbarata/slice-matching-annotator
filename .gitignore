@@ -1,0 +1,8 @@
+# backend
+__pycache__/
+
+# frontend
+node_modules/
+
+# misc
+.DS_STORE
