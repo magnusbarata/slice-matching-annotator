@@ -1,0 +1,32 @@
+.slides {
+  position: relative;
+  margin: 40px;
+}
+
+.slick-slider {
+  margin-top: 60px;
+}
+
+.slides .slick-prev:before, .slides .slick-next:before {
+  color: black;
+}
+
+.slice:focus {
+  outline-color: blue;
+  outline-width: 10px;
+  outline-style: solid;
+}
+
+.slides .slick-next {
+  top: unset;
+  bottom: -30px;
+}
+
+.slides .slick-prev {
+  top: -30px;
+}
+
+.slides .slick-prev, .slides .slick-next {
+  left: 50%;
+  transform: translate(-50%, 0) rotate(90deg);
+}
