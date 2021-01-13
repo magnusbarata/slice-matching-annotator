@@ -45,7 +45,7 @@ class Annotator(VBox):
                 scandir=scandir,
                 slider_range=len(files),
                 slices_per_scan=self.slices_per_scan,
-                answer=self.answer[change.new].get(scan.name, '未回答')
+                answer=self.answer[change.new].get(scan.name)
             )
             children.append(scan_widget)
         self.scans_grid.children = children

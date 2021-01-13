@@ -4,6 +4,10 @@ import matplotlib.pyplot as plt
 
 class SingleScan(VBox):
     def __init__(self, scandir, slider_range, answer, slices_per_scan=5):
+        if answer:
+            start_idx = int(answer.split('.')[0])
+        else:
+            start_idx = 1
         self.scandir = scandir
         self.date = scandir.split('/')[-1]
         self.slices_per_scan = slices_per_scan
@@ -11,13 +15,14 @@ class SingleScan(VBox):
         slider_label = Label(value=self.date)
         slider = IntSlider(
             min=1, max=slider_range-slices_per_scan+1,
+            value=start_idx,
             continous_updates=False
         )
         self.buttons = ToggleButtons(
-            options=[i+1 for i in range(slices_per_scan)]
+            options=[i+start_idx for i in range(slices_per_scan)]
         )
-        self.answer = Label(value=answer)
-        self._init_images()
+        self.answer = Label(value=answer if answer else '未回答')
+        self._init_images(start_idx)
         
         slider.observe(self._update_images, 'value')
         slider.observe(self._update_buttons, 'value')
@@ -26,13 +31,13 @@ class SingleScan(VBox):
                           self.fig.canvas, self.buttons])
 
         
-    def _init_images(self):
+    def _init_images(self, idx):
         self.ims = []
         plt.ioff()
         self.fig, axs = plt.subplots(1, 5)
         
         for i, ax in enumerate(axs):
-            fname = f'{self.scandir}/{i+1:08d}.DCM'
+            fname = f'{self.scandir}/{i+idx:08d}.DCM'
             self.ims.append(ax.imshow(dcm.dcmread(fname).pixel_array, cmap='gray'))
             ax.axis('off')
         
@@ -59,4 +64,7 @@ class SingleScan(VBox):
     
     @property
     def ans(self):
-        return self.answer.value
+        if self.answer.value == '未回答':
+            return None
+        else:
+            return self.answer.value
