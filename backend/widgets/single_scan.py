@@ -6,8 +6,10 @@ class SingleScan(VBox):
     def __init__(self, scandir, slider_range, answer, slices_per_scan=5):
         if answer:
             start_idx = int(answer.split('.')[0])
+            layout = {'border': 'solid green'}
         else:
             start_idx = 1
+            layout = {'border': 'solid red'}
         self.scandir = scandir
         self.date = scandir.split('/')[-1]
         self.slices_per_scan = slices_per_scan
@@ -18,17 +20,14 @@ class SingleScan(VBox):
             value=start_idx,
             continous_updates=False
         )
-        self.buttons = ToggleButtons(
-            options=[i+start_idx for i in range(slices_per_scan)]
-        )
+        self.buttons = Box([self._create_btns(start_idx)])
         self.answer = Label(value=answer if answer else '未回答')
         self._init_images(start_idx)
         
         slider.observe(self._update_images, 'value')
         slider.observe(self._update_buttons, 'value')
-        self.buttons.observe(self._select_slice, 'value')
         super().__init__([Box([slider_label, slider, self.answer]),
-                          self.fig.canvas, self.buttons])
+                          self.fig.canvas, self.buttons], layout=layout)
 
         
     def _init_images(self, idx):
@@ -54,11 +53,22 @@ class SingleScan(VBox):
         self.fig.canvas.draw()
     
     
+    def _create_btns(self, start_idx):
+        btns = ToggleButtons(
+            options=[i+start_idx for i in range(self.slices_per_scan)],
+            value=None,
+            style={'button_width': '120px'}
+        )
+        btns.observe(self._select_slice, 'value')
+        return btns
+
+
     def _update_buttons(self, change):
-        self.buttons.options = [i+change.new for i in range(self.slices_per_scan)]
+        self.buttons.children = [self._create_btns(change.new)]
 
 
     def _select_slice(self, change):
+        self.layout = {'border': 'solid green'}
         self.answer.value = f'{change.new:08d}.DCM'
         
     
