@@ -1,9 +1,10 @@
 from ipywidgets import Box, VBox, IntSlider, ToggleButtons, Label
 import pydicom as dcm
+import numpy as np
 import matplotlib.pyplot as plt
 
 class SingleScan(VBox):
-    def __init__(self, scandir, slider_range, answer, slices_per_scan=5):
+    def __init__(self, scandir, n_files, answer, slices_per_scan=5):
         if answer:
             start_idx = int(answer.split('.')[0])
             layout = {'border': 'solid green'}
@@ -11,12 +12,13 @@ class SingleScan(VBox):
             start_idx = 1
             layout = {'border': 'solid red'}
         self.scandir = scandir
+        self.n_files = n_files
         self.date = scandir.split('/')[-1]
         self.slices_per_scan = slices_per_scan
         
         slider_label = Label(value=self.date)
         slider = IntSlider(
-            min=1, max=slider_range-slices_per_scan+1,
+            min=1, max=n_files,
             value=start_idx,
             continous_updates=False
         )
@@ -30,16 +32,20 @@ class SingleScan(VBox):
                           self.fig.canvas, self.buttons], layout=layout)
 
         
-    def _init_images(self, idx):
-        self.ims = []
-        plt.ioff()
-        self.fig, axs = plt.subplots(1, 5)
-        
-        for i, ax in enumerate(axs):
-            fname = f'{self.scandir}/{i+idx:08d}.DCM'
-            self.ims.append(ax.imshow(dcm.dcmread(fname).pixel_array, cmap='gray'))
+    def _load_images(self, start_idx):
+        for i, ax in enumerate(self.axs):
+            if start_idx + i > self.n_files:
+                ax.imshow(np.ones((512, 512, 3), dtype='float'))
+            else:
+                fname = f'{self.scandir}/{start_idx + i:08d}.DCM'
+                ax.imshow(dcm.dcmread(fname).pixel_array, cmap='gray')
             ax.axis('off')
-        
+
+
+    def _init_images(self, start_idx):
+        plt.ioff()
+        self.fig, self.axs = plt.subplots(1, 5)
+        self._load_images(start_idx)
         plt.tight_layout(pad=0.1)
         self.fig.canvas.header_visible = False
         self.fig.canvas.footer_visible = False
@@ -47,15 +53,14 @@ class SingleScan(VBox):
     
     
     def _update_images(self, change):
-        for i, im in enumerate(self.ims):
-            fname = f'{self.scandir}/{change.new + i:08d}.DCM'
-            im.set_data(dcm.dcmread(fname).pixel_array)
+        self._load_images(change.new)
         self.fig.canvas.draw()
     
     
     def _create_btns(self, start_idx):
+        opt_max = min(start_idx + self.slices_per_scan, self.n_files + 1)
         btns = ToggleButtons(
-            options=[i+start_idx for i in range(self.slices_per_scan)],
+            options=[i for i in range(start_idx, opt_max)],
             value=None,
             style={'button_width': '120px'}
         )

@@ -43,7 +43,7 @@ class Annotator(VBox):
             files = [f for f in os.listdir(scandir) if f.endswith('.DCM')]
             scan_widget = SingleScan(
                 scandir=scandir,
-                slider_range=len(files),
+                n_files=len(files),
                 slices_per_scan=self.slices_per_scan,
                 answer=self.answer[change.new].get(scan.name)
             )
