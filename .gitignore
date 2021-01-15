@@ -1,5 +1,7 @@
 # backend
 __pycache__/
+*.DCM
+.ipynb_checkpoints
 
 # frontend
 node_modules/
