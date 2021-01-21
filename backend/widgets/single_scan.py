@@ -31,14 +31,26 @@ class SingleScan(VBox):
         super().__init__([Box([slider_label, slider, self.answer]),
                           self.fig.canvas, self.buttons], layout=layout)
 
-        
+    
+    def _load_image(self, fname, WC=None, WW=None):
+        ds = dcm.dcmread(fname)
+        WC = WC if WC else ds.WindowCenter
+        WW = WW if WW else ds.WindowWidth
+        img_min = WC - WW // 2
+        img_max = WC + WW // 2
+        img = ds.pixel_array * ds.RescaleSlope + ds.RescaleIntercept 
+        img[img < img_min] = img_min
+        img[img > img_max] = img_max
+        return img
+
+
     def _load_images(self, start_idx):
         for i, ax in enumerate(self.axs):
             if start_idx + i > self.n_files:
                 ax.imshow(np.ones((512, 512, 3), dtype='float'))
             else:
                 fname = f'{self.scandir}/{start_idx + i:08d}.DCM'
-                ax.imshow(dcm.dcmread(fname).pixel_array, cmap='gray')
+                ax.imshow(self._load_image(fname), cmap='gray')
             ax.axis('off')
 
 
