@@ -36,6 +36,11 @@ class SingleScan(VBox):
         ds = dcm.dcmread(fname)
         WC = WC if WC else ds.WindowCenter
         WW = WW if WW else ds.WindowWidth
+        ## Some device uses Multivalue
+        if type(WW) is dcm.multival.MultiValue:
+            WW = WW[0]
+        if type(WC) is dcm.multival.MultiValue:
+            WC = WC[0]
         img_min = WC - WW // 2
         img_max = WC + WW // 2
         img = ds.pixel_array * ds.RescaleSlope + ds.RescaleIntercept 
