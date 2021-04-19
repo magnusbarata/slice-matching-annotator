@@ -61,7 +61,7 @@ class SingleScan(VBox):
 
     def _init_images(self, start_idx):
         plt.ioff()
-        self.fig, self.axs = plt.subplots(1, 5)
+        self.fig, self.axs = plt.subplots(1, self.slices_per_scan)
         self._load_images(start_idx)
         plt.tight_layout(pad=0.1)
         self.fig.canvas.header_visible = False
